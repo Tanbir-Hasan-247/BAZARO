@@ -27,9 +27,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-bazaro-super-secret-key-development-2026')
 
-IS_VERCEL = config('VERCEL', default=False, cast=bool)
+def _bool_config(name: str, default: bool) -> bool:
+    raw = config(name, default=None)
+    if raw is None or str(raw).strip() == '':
+        return default
+    val = str(raw).strip().lower()
+    if val in ('1', 'true', 'yes', 'on'):
+        return True
+    if val in ('0', 'false', 'no', 'off'):
+        return False
+    return default
+
+
+IS_VERCEL = _bool_config('VERCEL', False)
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=not IS_VERCEL, cast=bool)
+DEBUG = _bool_config('DEBUG', not IS_VERCEL)
 
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
@@ -115,7 +127,7 @@ FRONTEND_PUBLIC_URL = config("FRONTEND_PUBLIC_URL", default="http://localhost:51
 _default_backend_url = f"https://{_vercel_url}" if _vercel_url else "http://127.0.0.1:8000"
 BACKEND_PUBLIC_URL = config("BACKEND_PUBLIC_URL", default=_default_backend_url).rstrip("/")
 
-CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
+CORS_ALLOW_ALL_ORIGINS = _bool_config('CORS_ALLOW_ALL_ORIGINS', True)
 CORS_ALLOWED_ORIGINS = [
     "https://dokanly.vercel.app",
     "http://localhost:5173",
@@ -170,7 +182,7 @@ def _build_postgres_from_url(url: str) -> dict:
     }
 
 
-if 'test' in sys.argv and not config('TEST_USE_POSTGRES', default=False, cast=bool):
+if 'test' in sys.argv and not _bool_config('TEST_USE_POSTGRES', False):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -220,12 +232,12 @@ def _resolve_cloudinary_credentials():
     return None
 
 
-secure = config('secure', default=True, cast=bool)
+secure = _bool_config('secure', True)
 _cloudinary_creds = _resolve_cloudinary_credentials()
 _is_running_tests = 'test' in sys.argv
 USE_CLOUDINARY_MEDIA = bool(
     _cloudinary_creds
-    and not (_is_running_tests and not config('TEST_USE_CLOUDINARY', default=False, cast=bool))
+    and not (_is_running_tests and not _bool_config('TEST_USE_CLOUDINARY', False))
 )
 
 if _cloudinary_creds:
@@ -331,7 +343,7 @@ if _email_host:
     EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
     EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
     EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-    EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+    EMAIL_USE_TLS = _bool_config("EMAIL_USE_TLS", True)
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -341,7 +353,7 @@ SITE_NAME = "BAZARO"
 # Optional Live Sandbox Payment Gateway Credentials
 SSLCOMMERZ_STORE_ID = config("SSLCOMMERZ_STORE_ID", default="")
 SSLCOMMERZ_STORE_PASSWD = config("SSLCOMMERZ_STORE_PASSWD", default="")
-SSLCOMMERZ_IS_SANDBOX = config("SSLCOMMERZ_IS_SANDBOX", default=True, cast=bool)
+SSLCOMMERZ_IS_SANDBOX = _bool_config("SSLCOMMERZ_IS_SANDBOX", True)
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
 
 REST_FRAMEWORK = {
