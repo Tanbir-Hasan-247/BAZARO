@@ -20,10 +20,12 @@ import { getCategoryIconName } from '../../constants/categoryIcons';
 import { useCart } from '../../context/CartContext';
 import { useAppTheme } from '../../context/ThemeContext';
 
-function computeRemainingTime(targetIso) {
-  const targetMs = targetIso ? new Date(targetIso).getTime() : NaN;
-  const fallbackMs = Date.now() + 3 * 24 * 60 * 60 * 1000;
-  const diff = Math.max(0, (Number.isFinite(targetMs) ? targetMs : fallbackMs) - Date.now());
+const DEFAULT_FLASH_DURATION_MS = 3 * 24 * 60 * 60 * 1000;
+
+function computeRemainingTime(targetIso, fallbackTargetMs, nowMs = Date.now()) {
+  const parsedMs = targetIso ? new Date(targetIso).getTime() : NaN;
+  const targetMs = Number.isFinite(parsedMs) ? parsedMs : fallbackTargetMs;
+  const diff = Math.max(0, targetMs - nowMs);
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
   const mins = Math.floor((diff / (1000 * 60)) % 60);
@@ -36,7 +38,8 @@ const HomeScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [campaign, setCampaign] = useState(null);
-  const [countdown, setCountdown] = useState(() => computeRemainingTime(null));
+  const [fallbackTargetMs, setFallbackTargetMs] = useState(() => Date.now() + DEFAULT_FLASH_DURATION_MS);
+  const [countdown, setCountdown] = useState(() => computeRemainingTime(null, fallbackTargetMs));
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -51,7 +54,9 @@ const HomeScreen = ({ navigation }) => {
       const res = await apiClient.get('/campaign-settings/');
       if (res.data) {
         setCampaign(res.data);
-        setCountdown(computeRemainingTime(res.data.flash_ends_at));
+        if (res.data.flash_ends_at && Number.isFinite(new Date(res.data.flash_ends_at).getTime())) {
+          setCountdown(computeRemainingTime(res.data.flash_ends_at, 0));
+        }
       }
     } catch {
       // Optional endpoint; storefront renders cleanly if offline/older server
@@ -104,11 +109,35 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     if (!campaign?.flash_enabled) return undefined;
-    const id = setInterval(() => {
-      setCountdown(computeRemainingTime(campaign.flash_ends_at));
-    }, 1000);
+
+    const tick = () => {
+      const parsedMs = campaign.flash_ends_at ? new Date(campaign.flash_ends_at).getTime() : NaN;
+      const hasExplicitTarget = Number.isFinite(parsedMs);
+      let activeFallbackMs = fallbackTargetMs;
+      if (!hasExplicitTarget && Date.now() >= fallbackTargetMs) {
+        activeFallbackMs = Date.now() + DEFAULT_FLASH_DURATION_MS;
+        setFallbackTargetMs(activeFallbackMs);
+      }
+
+      setCountdown((prev) => {
+        const next = computeRemainingTime(campaign.flash_ends_at, activeFallbackMs);
+        if (
+          prev.days === next.days &&
+          prev.hours === next.hours &&
+          prev.mins === next.mins &&
+          prev.secs === next.secs &&
+          prev.expired === next.expired
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    };
+
+    tick();
+    const id = setInterval(tick, 500);
     return () => clearInterval(id);
-  }, [campaign?.flash_enabled, campaign?.flash_ends_at]);
+  }, [campaign?.flash_enabled, campaign?.flash_ends_at, fallbackTargetMs]);
 
   const onRefresh = async () => {
     setRefreshing(true);
