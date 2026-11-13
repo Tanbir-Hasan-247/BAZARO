@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "BAZARO",
+    "slug": "bazaro-mobile",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D0A08"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bazaro.app"
+    },
+    "android": {
+      "package": "com.bazaro.app",
+      "softwareKeyboardLayoutMode": "pan",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FAF5EB"
+      },
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "df48d4f6-e119-4d43-9f4c-62af576262b2"
+      }
+    },
+    "owner": "ashrafulx"
+  }
+}

@@ -1,0 +1,322 @@
+/* BAZARO Luxury Design Tokens & Modern Animation Primitives */
+
+:root {
+  --bazaro-obsidian: #0D0A08;
+  --bazaro-espresso: #1A1410;
+  --bazaro-walnut: #2A1F18;
+  --bazaro-gold: #C59B4B;
+  --bazaro-gold-light: #E5C77A;
+  --bazaro-gold-pale: #FFF3D1;
+  --bazaro-gold-dark: #9B742C;
+  --bazaro-bronze: #8A6623;
+  --bazaro-cream: #FAF5EB;
+  --bazaro-alabaster: #FDF9F1;
+  --bazaro-cream-soft: #F3EAD8;
+  --bazaro-stone: #EAE0CE;
+  --bazaro-ink: #1F1916;
+  --bazaro-shadow-gold: 0 20px 50px -15px rgba(197, 155, 75, 0.25);
+  --bazaro-shadow-deep: 0 25px 60px -15px rgba(13, 10, 8, 0.45);
+  --in-oklab: ;
+  --in-oklch: ;
+}
+
+@supports (linear-gradient(in oklab, white, black)) {
+  :root {
+    --in-oklab: in oklab;
+    --in-oklch: in oklch;
+  }
+}
+
+/* =========================================================
+   interactive-content-reveal (Modern Web Guidance Pattern)
+   Only transition --inner-size and --outer-size.
+   NEVER transition --mouse-x or --mouse-y.
+   ========================================================= */
+@property --inner-size {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --outer-size {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+.bazaro-spotlight-stage {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --inner-size: 0px;
+  --outer-size: 0px;
+  position: relative;
+}
+
+.bazaro-spotlight-stage:hover,
+.bazaro-spotlight-stage:focus-within {
+  --inner-size: 130px;
+  --outer-size: 440px;
+}
+
+.reveal-layer {
+  pointer-events: none;
+  transition: --inner-size 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              --outer-size 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(229, 199, 122, 0.16) var(--inner-size, 0%),
+    rgba(197, 155, 75, 0.05) calc(var(--inner-size, 0%) + 80px),
+    transparent var(--outer-size, 0%)
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-layer {
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   3D Spatial Showcase & Natural Interactions
+   ========================================================= */
+.bazaro-3d-stage {
+  perspective: 1400px;
+  transform-style: preserve-3d;
+}
+
+.bazaro-3d-preserve {
+  transform-style: preserve-3d;
+}
+
+.bazaro-3d-layer-back {
+  transform: translateZ(-28px);
+}
+
+.bazaro-3d-layer-mid {
+  transform: translateZ(34px);
+}
+
+.bazaro-3d-layer-front {
+  transform: translateZ(62px);
+}
+
+/* Keyboard accessible high-contrast focus outlines (natural-interactions) */
+:root {
+  --bazaro-focus-ring: #7C5818;
+}
+
+[data-surface="dark"] {
+  --bazaro-focus-ring: #E5C77A;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--bazaro-focus-ring, #7C5818);
+  outline-offset: 3px;
+}
+
+/* Reveal secondary card actions on hover, keyboard focus, AND touchscreens */
+.bazaro-hover-reveal {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.22s ease-out, transform 0.22s ease-out;
+}
+
+.group:hover .bazaro-hover-reveal,
+.group:focus-within .bazaro-hover-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (hover: none) {
+  .bazaro-hover-reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* =========================================================
+   parallax-scroll-effects & scroll-entry-exit-effects
+   ========================================================= */
+.parallax-clip-wrapper {
+  overflow: clip;
+}
+
+@keyframes bazaro-scroll-enter {
+  from {
+    opacity: 0;
+    transform: translateY(34px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .bazaro-view-reveal {
+      animation: bazaro-scroll-enter linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 26%;
+    }
+  }
+}
+
+/* =========================================================
+   Kinetic Luxury Brand Animations & Typography Shimmer
+   ========================================================= */
+@keyframes bazaro-marquee-left {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes bazaro-marquee-right {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes bazaro-gold-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes bazaro-float-slow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes bazaro-orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-bazaro-marquee {
+  display: flex;
+  width: max-content;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: bazaro-marquee-left 36s linear infinite;
+  }
+}
+
+.animate-bazaro-marquee-reverse {
+  display: flex;
+  width: max-content;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: bazaro-marquee-right 42s linear infinite;
+  }
+}
+
+.marquee-track:hover .animate-bazaro-marquee,
+.marquee-track:hover .animate-bazaro-marquee-reverse {
+  animation-play-state: paused;
+}
+
+.text-liquid-gold {
+  background: linear-gradient(
+    115deg,
+    #B08434 0%,
+    #E5C77A 25%,
+    #FFF3D1 50%,
+    #C59B4B 75%,
+    #E5C77A 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: bazaro-gold-shimmer 7s ease-in-out infinite;
+  }
+}
+
+.font-serif-luxury {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-serif-editorial {
+  font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+}
+
+.bazaro-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle luxury film grain texture for dark atelier sections */
+.bazaro-grain {
+  isolation: isolate;
+}
+
+.bazaro-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  z-index: 1;
+}
+
+/* Warm champagne shimmer loader replacing flat grey pulse boxes */
+@keyframes bazaro-shimmer-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.bazaro-shimmer {
+  background: linear-gradient(
+    110deg var(--in-oklab),
+    rgba(234, 224, 206, 0.45) 20%,
+    rgba(255, 243, 209, 0.72) 45%,
+    rgba(234, 224, 206, 0.45) 70%
+  );
+  background-size: 200% 100%;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: bazaro-shimmer-sweep 1.8s ease-in-out infinite;
+  }
+}
+
+/* Off-screen containment for WebGL/heavy stages (efficient-background-processing) */
+.bazaro-heavy-stage {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 540px;
+}
+
+.animate-bazaro-float {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: bazaro-float-slow 5.5s ease-in-out infinite;
+  }
+}
+
+.animate-bazaro-spin-slow {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: bazaro-orbit-spin 28s linear infinite;
+  }
+}

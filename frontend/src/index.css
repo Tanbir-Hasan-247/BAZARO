@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "./styles/tokens.css";
+@import "./styles.css";
+
+/* Base Custom Utilities */
+@layer base {
+  body {
+    background-color: #FAF5EB;
+    color: #1F1916;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background-color: rgba(197, 155, 75, 0.25);
+    color: #1A1410;
+  }
+}

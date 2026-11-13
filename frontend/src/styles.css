@@ -1,0 +1,199 @@
+:root {
+  --page: #FAF5EB;
+  --ink: #1F1916;
+  --navy: #0D0A08;
+  --white: #FFFDF9;
+  --card: #C59B4B;
+  --primary-red: #C59B4B;
+  --primary-red-hover: #9B742C;
+  --w: min(92vw, 1380px);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Unified Site Header Shell (Houses TopAnnouncementBar + Floating Nav Seamlessly) */
+#bazaro-site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+#bazaro-site-header > * {
+  pointer-events: auto;
+}
+
+#nav-shell {
+  width: var(--w);
+  margin: 0.65rem auto 0;
+  position: relative;
+  transition: margin-top 0.32s var(--ease);
+}
+
+#bazaro-site-header.is-scrolled #nav-shell {
+  margin-top: 0.35rem;
+}
+
+/* BAZARO Obsidian Island Navbar */
+#nav {
+  position: relative;
+  width: 100%;
+  min-height: 54px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 1.35rem;
+  background: rgba(13, 10, 8, 0.88);
+  backdrop-filter: blur(22px) saturate(155%);
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+  border: 1px solid rgba(197, 155, 75, 0.28);
+  box-shadow:
+    0 20px 44px -16px rgba(13, 10, 8, 0.55),
+    0 1px 0 rgba(229, 199, 122, 0.14) inset;
+  color: #FAF5EB;
+  transition: background-color 0.3s var(--ease), border-color 0.3s var(--ease), padding 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+#bazaro-site-header.is-scrolled #nav {
+  background: rgba(13, 10, 8, 0.96);
+  border-color: rgba(229, 199, 122, 0.44);
+  padding: 0.35rem 1.25rem;
+  box-shadow:
+    0 24px 52px -16px rgba(0, 0, 0, 0.7),
+    0 1px 0 rgba(229, 199, 122, 0.22) inset;
+}
+
+#nav:hover,
+#nav.open {
+  border-color: rgba(229, 199, 122, 0.48);
+  background: rgba(13, 10, 8, 0.95);
+}
+
+#nav .logo {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+#links {
+  align-items: center;
+  gap: clamp(0.85rem, 1.5vw, 1.85rem);
+  color: #FAF5EB;
+}
+
+#links a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #FAF5EB;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.22s var(--ease);
+}
+
+#links a:hover,
+#links a[aria-current="page"] {
+  color: #E5C77A;
+}
+
+#links a svg {
+  transition: transform 0.28s var(--ease);
+}
+
+#nav.open #links a.shop svg {
+  transform: rotate(180deg);
+}
+
+#nav.open #links a.shop {
+  color: #E5C77A;
+}
+
+/* Mega Department Dropdown */
+#drop {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 10px);
+  min-height: 76px;
+  padding: 1rem 1.75rem;
+  background: rgba(17, 13, 10, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 16px;
+  z-index: 49;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.9rem clamp(1.25rem, 2.8vw, 2.75rem);
+  clip-path: inset(0 0 100% 0 round 16px);
+  pointer-events: none;
+  transition: clip-path 0.4s var(--ease);
+  box-shadow: 0 28px 60px -16px rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(197, 155, 75, 0.34);
+  color: #FAF5EB;
+}
+
+#drop.open {
+  clip-path: inset(0 0 0 0 round 16px);
+  pointer-events: auto;
+}
+
+#drop a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: clamp(11px, 0.78vw, 13px);
+  font-weight: 600;
+  color: #FAF5EB;
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s, transform 0.35s var(--ease), color 0.22s, background-color 0.22s, border-color 0.22s;
+}
+
+#drop.open a {
+  opacity: 1;
+  transform: none;
+}
+
+#drop a:hover {
+  background: rgba(197, 155, 75, 0.12);
+  border-color: rgba(197, 155, 75, 0.4);
+  color: #E5C77A;
+}
+
+#drop svg {
+  width: clamp(22px, 1.8vw, 28px);
+  height: clamp(22px, 1.8vw, 28px);
+  fill: none;
+  stroke: #C59B4B;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --w: calc(100vw - 16px);
+  }
+
+  #nav-shell {
+    margin-top: 0.45rem;
+  }
+
+  #nav {
+    padding: 0.4rem 0.75rem;
+  }
+
+  #links,
+  #drop {
+    display: none;
+  }
+}

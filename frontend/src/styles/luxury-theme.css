@@ -1,0 +1,390 @@
+/* ================================================================
+   BAZARO — Global Luxury Theme Layer (Obsidian, Gold & Heritage Cream)
+   Covers floating island navbar, native <dialog> top-layer containment,
+   and deferred :user-invalid form controls across all pages.
+   ================================================================ */
+
+/* Prevent focused anchor controls from hiding beneath the unified fixed header */
+html {
+  scroll-padding-top: 7.5rem;
+}
+
+/* Native Scroll Progress Hairline (scroll-progress-indicator) */
+#bazaro-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 60;
+  pointer-events: none;
+  background: linear-gradient(90deg, #A67E33 0%, #E5C77A 55%, #FFF3D1 100%);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--scroll-progress, 0));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
+    @keyframes bazaro-progress-grow {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    #bazaro-scroll-progress {
+      animation: bazaro-progress-grow auto linear;
+      animation-timeline: scroll(block root);
+    }
+
+    @keyframes bazaro-header-compact {
+      to {
+        transform: translate3d(0, -3px, 0) scale(0.992);
+      }
+    }
+
+    #nav-shell {
+      animation: bazaro-header-compact auto linear both;
+      animation-timeline: scroll(block root);
+      animation-range: 0px 140px;
+    }
+  }
+}
+
+/* Shared-Element Same-Document View Transitions */
+::view-transition-old(bazaro-product-hero),
+::view-transition-new(bazaro-product-hero) {
+  height: 100%;
+  object-fit: contain;
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.32s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Native Modal Dialog Top Layer & Scroll Containment
+   (Never locks html/body scroll; isolates overscroll inside backdrop) */
+dialog.bazaro-dialog:modal {
+  overscroll-behavior: contain;
+  margin: auto;
+  max-height: min(92dvh, 880px);
+  width: min(94vw, 720px);
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}
+
+dialog.bazaro-dialog.bazaro-dialog-sm:modal {
+  width: min(92vw, 520px);
+}
+
+dialog.bazaro-dialog.bazaro-dialog-lg:modal {
+  width: min(95vw, 860px);
+}
+
+dialog.bazaro-dialog.bazaro-dialog-drawer:modal {
+  margin: 0 0 0 auto;
+  height: 100dvh;
+  max-height: 100dvh;
+  width: min(100vw, 440px);
+}
+
+dialog.bazaro-dialog::backdrop {
+  background: rgba(10, 7, 5, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+/* Drawer / Scroll Container Containment */
+.bazaro-scroll-contain {
+  overscroll-behavior: contain;
+}
+
+/* Deferred Form Validation (:user-invalid + legacy class fallback) */
+.bazaro-field-input {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.bazaro-field-input:is(:user-invalid, .user-invalid-fallback) {
+  border-color: #C2410C !important;
+  box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.18) !important;
+}
+
+.bazaro-field-input:is(:user-valid) {
+  border-color: rgba(197, 155, 75, 0.7);
+}
+
+.bazaro-field-error {
+  display: none;
+  color: #FCA5A5;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
+}
+
+[data-surface="light"] .bazaro-field-error,
+.bazaro-surface-light .bazaro-field-error {
+  color: #B91C1C;
+}
+
+.bazaro-field-input:is(:user-invalid, .user-invalid-fallback) ~ .bazaro-field-error,
+.bazaro-field-group:has(.bazaro-field-input:is(:user-invalid, .user-invalid-fallback)) .bazaro-field-error,
+.bazaro-field-error[data-visible="true"] {
+  display: block;
+}
+
+/* Luxury Card & Badge Surfaces */
+.bazaro-glass-dark {
+  background: linear-gradient(155deg var(--in-oklab), rgba(26, 20, 16, 0.94), rgba(13, 10, 8, 0.98));
+  border: 1px solid rgba(197, 155, 75, 0.24);
+  box-shadow: 0 24px 56px -18px rgba(0, 0, 0, 0.55);
+}
+
+.bazaro-card-cream {
+  background: linear-gradient(180deg var(--in-oklab), #FDF9F1 0%, #FAF5EB 100%);
+  border: 1px solid rgba(197, 155, 75, 0.22);
+  box-shadow: 0 18px 40px -22px rgba(31, 25, 22, 0.14);
+}
+
+.bazaro-gold-btn {
+  background: linear-gradient(135deg var(--in-oklab), #E5C77A 0%, #C59B4B 55%, #A67E33 100%);
+  color: #0D0A08;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: 0 12px 28px -10px rgba(197, 155, 75, 0.45);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+}
+
+.bazaro-gold-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px -8px rgba(229, 199, 122, 0.62);
+  filter: brightness(1.04);
+}
+
+.bazaro-gold-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.bazaro-editorial-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(197, 155, 75, 0.45);
+  background: #0D0A08;
+  color: #E5C77A;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1), color 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, transform 0.25s ease;
+}
+
+.bazaro-editorial-btn:hover:not(:disabled) {
+  background: #C59B4B;
+  color: #0D0A08;
+  border-color: #E5C77A;
+}
+
+/* Micro-animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Reduced Motion Respect */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .bazaro-gold-btn {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ================================================================
+   BAZARO — Cross-Device Responsiveness & Container-Driven Carousels
+   ================================================================ */
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  overflow-wrap: anywhere;
+}
+
+img, video {
+  max-inline-size: 100%;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+p, li {
+  text-wrap: pretty;
+}
+
+/* Visually Hidden Utility (accessible screen-reader live regions) */
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* Touch Device Target Size Compliance (WCAG 2.5.5 / 2.5.8) */
+:root {
+  --bazaro-target: 24px;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --bazaro-target: 44px;
+  }
+}
+
+.bazaro-touch-control {
+  min-block-size: var(--bazaro-target);
+  min-inline-size: var(--bazaro-target);
+  touch-action: manipulation;
+}
+
+/* Container-Aware Single-Row Department Carousel */
+.bazaro-cat-shell {
+  container: chambers / inline-size;
+  position: relative;
+}
+
+.bazaro-cat-track {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  touch-action: manipulation;
+  scrollbar-width: none;
+  padding-block: 0.5rem 0.75rem;
+}
+
+.bazaro-cat-track::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bazaro-cat-track {
+    scroll-behavior: smooth;
+  }
+}
+
+.bazaro-cat-slide {
+  flex: 0 0 calc((100% - 0.75rem) / 1.24);
+  min-inline-size: 0;
+  scroll-snap-align: start;
+}
+
+@container chambers (inline-size >= 34rem) {
+  .bazaro-cat-slide {
+    flex: 0 0 calc((100% - 1rem) / 2);
+  }
+}
+
+@container chambers (inline-size >= 52rem) {
+  .bazaro-cat-slide {
+    flex: 0 0 calc((100% - 2rem) / 3);
+  }
+}
+
+@container chambers (inline-size >= 68rem) {
+  .bazaro-cat-slide {
+    flex: 0 0 calc((100% - 3rem) / 4);
+  }
+}
+
+/* Compact visual pagination dot with generous touch hit area */
+.bazaro-marker-dot {
+  position: relative;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.bazaro-marker-dot::after {
+  content: "";
+  position: absolute;
+  inset: -12px -6px;
+}
+
+/* Native <dialog> Modal Scroll Containment & Backdrop */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+/* Accessible keyboard focus indicator across light and dark surfaces */
+:where(a:any-link, button, input, select, textarea):focus-visible {
+  outline: 2px solid #c59b4b;
+  outline-offset: 2px;
+}
+
+/* Clean isolated A4/Letter Order Invoice printing via body.bazaro-printing */
+@media print {
+  body.bazaro-printing {
+    background: #ffffff !important;
+    color: #1a1410 !important;
+  }
+
+  body.bazaro-printing > *:not(#bazaro-print-root) {
+    display: none !important;
+  }
+
+  body.bazaro-printing > #bazaro-print-root {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #1a1410 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
