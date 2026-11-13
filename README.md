@@ -41,13 +41,6 @@
 
 ## 🛠️ How to Run Locally
 
-### ⚡ Quick Start (One-Click)
-Run the automated launcher in Windows:
-* Double click `run-all.bat` (or execute `.\run-all.ps1` in PowerShell).
-This will automatically launch both the Django Backend (`http://127.0.0.1:8000`) and React Frontend (`http://localhost:5173`) in separate windows.
-
----
-
 ### 1. ⚙️ Backend (Django REST Framework)
 ```bash
 cd backend
@@ -56,7 +49,7 @@ python -m venv venv
 pip install -r requirements.txt
 python manage.py migrate
 python seed_data.py       # Seeds categories, products, reviews, and test accounts
-python manage.py runserver 127.0.0.1:8000
+python manage.py runserver 0.0.0.0:8000
 ```
 * *API live at `http://127.0.0.1:8000/api/v1/`*
 * *Swagger at `http://127.0.0.1:8000/swagger/`*

@@ -24,7 +24,7 @@ const CategoryProductsScreen = ({ route, navigation }) => {
   const fetchCategoryProducts = useCallback(async () => {
     try {
       const res = await apiClient.get('/products/', {
-        params: { category_id: categoryId },
+        params: { category_id: categoryId, page_size: 50 },
       });
       const data = res.data?.results || res.data;
       setProducts(Array.isArray(data) ? data : []);

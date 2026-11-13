@@ -51,7 +51,13 @@ export const AuthProvider = ({ children }) => {
   }, [fetchUserProfile]);
 
   useEffect(() => {
-    loadStoredAuth();
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) loadStoredAuth();
+    });
+    return () => {
+      active = false;
+    };
   }, [loadStoredAuth]);
 
   const login = async (email, password) => {

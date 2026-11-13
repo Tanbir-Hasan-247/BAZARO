@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import apiClient from '../../api/client';
+import apiClient, { formatApiError, getApiBaseUrl } from '../../api/client';
 import ProductCard from '../../components/ProductCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { FONTS, SIZES, SHADOWS } from '../../constants/theme';
@@ -41,6 +41,7 @@ const HomeScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [fetchError, setFetchError] = useState('');
 
   const { cartItemCount } = useCart();
   const { theme, isDarkMode, toggleTheme } = useAppTheme();
@@ -69,7 +70,8 @@ const HomeScreen = ({ navigation }) => {
 
   const fetchProducts = useCallback(async (catId = selectedCategory, search = searchQuery) => {
     try {
-      const params = {};
+      setFetchError('');
+      const params = { page_size: 50 };
       if (catId) params.category_id = catId;
       if (search.trim()) params.search = search.trim();
 
@@ -78,6 +80,7 @@ const HomeScreen = ({ navigation }) => {
       setProducts(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error('Error fetching products:', e);
+      setFetchError(formatApiError(e, `Cannot reach backend (${getApiBaseUrl()})`));
     }
   }, [selectedCategory, searchQuery]);
 
@@ -401,10 +404,19 @@ const HomeScreen = ({ navigation }) => {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="diamond-outline" size={50} color={theme.textMuted} />
-            <Text style={[styles.emptyText, { color: theme.textMuted }]}>
-              No pieces matched your current selection.
+            <Ionicons
+              name={fetchError ? 'cloud-offline-outline' : 'diamond-outline'}
+              size={50}
+              color={fetchError ? theme.danger : theme.textMuted}
+            />
+            <Text style={[styles.emptyText, { color: fetchError ? theme.danger : theme.textMuted }]}>
+              {fetchError || 'No pieces matched your current selection.'}
             </Text>
+            {fetchError ? (
+              <Text style={[styles.emptySubHint, { color: theme.textMuted }]}>
+                Active API: {getApiBaseUrl()}
+              </Text>
+            ) : null}
             <TouchableOpacity
               style={[
                 styles.resetBtn,
@@ -413,11 +425,11 @@ const HomeScreen = ({ navigation }) => {
               onPress={() => {
                 setSelectedCategory(null);
                 setSearchQuery('');
-                fetchProducts(null, '');
+                onRefresh();
               }}
             >
               <Text style={[styles.resetBtnText, { color: theme.buttonText }]}>
-                Show All Pieces
+                {fetchError ? 'Retry Connection' : 'Show All Pieces'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -694,6 +706,13 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 14,
     textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  emptySubHint: {
+    marginTop: 6,
+    fontSize: 11.5,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
   resetBtn: {
     marginTop: 14,

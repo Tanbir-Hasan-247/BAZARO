@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../constants/theme';
@@ -12,9 +12,12 @@ const ProductCard = ({ product, onPress, onRequireAuth }) => {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { theme } = useAppTheme();
 
-  const rawImage =
-    product?.images && product.images.length > 0 ? product.images[0].image : null;
-  const imageUrl = resolveMediaUrl(rawImage);
+  const imageCandidates = (Array.isArray(product?.images) ? product.images : [])
+    .map((img) => resolveMediaUrl(img?.image))
+    .filter(Boolean);
+  const [failedState, setFailedState] = useState({ id: null, idx: 0 });
+  const imgAttempt = failedState.id === product?.id ? failedState.idx : 0;
+  const imageUrl = imageCandidates[imgAttempt] || null;
 
   const isOutOfStock = (product?.stock || 0) <= 0;
   const saved = isWishlisted(product?.id);
@@ -76,6 +79,12 @@ const ProductCard = ({ product, onPress, onRequireAuth }) => {
             source={{ uri: imageUrl }}
             style={styles.image}
             resizeMode="cover"
+            onError={() =>
+              setFailedState((prev) => ({
+                id: product?.id,
+                idx: prev.id === product?.id ? prev.idx + 1 : 1,
+              }))
+            }
           />
         ) : (
           <View style={styles.placeholderImage}>

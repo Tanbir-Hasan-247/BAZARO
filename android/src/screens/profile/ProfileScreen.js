@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import apiClient, { BASE_URL, formatApiError } from '../../api/client';
+import apiClient, { getApiBaseUrl, formatApiError } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useAppTheme } from '../../context/ThemeContext';
@@ -24,14 +24,10 @@ const ProfileScreen = ({ navigation }) => {
   const { theme, isDarkMode, toggleTheme } = useAppTheme();
 
   const [footerConfig, setFooterConfig] = useState(null);
-  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterEmailInput, setNewsletterEmailInput] = useState(null);
   const [subscribing, setSubscribing] = useState(false);
 
-  useEffect(() => {
-    if (user?.email) {
-      setNewsletterEmail((prev) => prev || user.email);
-    }
-  }, [user?.email]);
+  const newsletterEmail = newsletterEmailInput ?? user?.email ?? '';
 
   useEffect(() => {
     apiClient
@@ -277,7 +273,7 @@ const ProfileScreen = ({ navigation }) => {
               placeholder={footerConfig?.newsletter_placeholder || 'you@example.com'}
               placeholderTextColor={theme.textMuted}
               value={newsletterEmail}
-              onChangeText={setNewsletterEmail}
+              onChangeText={setNewsletterEmailInput}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -304,7 +300,7 @@ const ProfileScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <Text style={[styles.apiHint, { color: theme.textMuted }]}>
-          Endpoint: {BASE_URL}
+          Endpoint: {getApiBaseUrl()}
         </Text>
       </ScrollView>
     </SafeAreaView>

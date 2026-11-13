@@ -32,6 +32,8 @@ ALLOWED_HOSTS = config(
     default='127.0.0.1,localhost,10.0.2.2,0.0.0.0,.vercel.app',
     cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
 )
+if DEBUG and '*' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS = [*ALLOWED_HOSTS, '*']
 
 AUTH_USER_MODEL='users.User'
 # Application definition

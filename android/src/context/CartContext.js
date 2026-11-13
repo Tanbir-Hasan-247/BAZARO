@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient, { formatApiError } from '../api/client';
 import { useAuth } from './AuthContext';
@@ -16,16 +16,7 @@ export const CartProvider = ({ children }) => {
   const [cartId, setCartId] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      initCart();
-    } else {
-      setCart(null);
-      setCartId(null);
-    }
-  }, [isAuthenticated]);
-
-  const initCart = async () => {
+  const initCart = useCallback(async () => {
     try {
       setLoading(true);
       const storedCartId = await getStoredValue(
@@ -56,7 +47,23 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    Promise.resolve().then(() => {
+      if (!active) return;
+      if (isAuthenticated) {
+        initCart();
+      } else {
+        setCart(null);
+        setCartId(null);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated, initCart]);
 
   const refreshCart = async () => {
     if (!cartId) return initCart();

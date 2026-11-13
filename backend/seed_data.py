@@ -369,10 +369,10 @@ def seed():
     }
 
     gallery_presets = {
-        16: ["/products/sovereign-tourbillon-watch.jpg", "/products/champagne-chronograph-watch.jpg"],
-        18: ["/products/oud-royale-perfume.jpg", "/products/noir-velvet-perfume.jpg"],
-        21: ["/products/velvet-quilted-handbag.jpg", "/products/royal-silk-scarf.jpg"],
-        29: ["/products/carhartt-canvas-sneakers.jpg", "/products/obsidian-desert-boots.jpg"],
+        16: ["/products/sovereign-watch.jpg", "/products/heritage-chronograph.jpg"],
+        18: ["/products/oud-royale-perfume.jpg", "/products/coco-noir-parfum.jpg"],
+        21: ["/products/noir-quilted-crossbody.jpg", "/products/crimson-leather-satchel.jpg"],
+        29: ["/products/carhartt-canvas-sneakers.jpg"],
     }
 
     for pdata in products_data:

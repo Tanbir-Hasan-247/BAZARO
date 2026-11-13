@@ -75,8 +75,15 @@ const ProductDetailScreen = ({ route, navigation }) => {
   }, [productId]);
 
   useEffect(() => {
-    fetchProductDetails();
-    fetchReviews();
+    let active = true;
+    Promise.resolve().then(() => {
+      if (!active) return;
+      fetchProductDetails();
+      fetchReviews();
+    });
+    return () => {
+      active = false;
+    };
   }, [fetchProductDetails, fetchReviews]);
 
   const navigateAuth = () =>

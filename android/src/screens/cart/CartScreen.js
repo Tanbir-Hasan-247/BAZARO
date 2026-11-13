@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -56,22 +56,6 @@ const CartScreen = ({ navigation }) => {
   const [mfsWallet, setMfsWallet] = useState('bKash');
   const [settling, setSettling] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-      setRecipientName((prev) => prev || fullName || user.email?.split('@')[0] || '');
-      setContactPhone((prev) => prev || user.phone_number || '');
-      setShippingAddress((prev) => prev || user.address || '');
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (!cart?.items?.length) {
-      setCouponApplied(null);
-      setCouponErr('');
-    }
-  }, [cart?.items?.length]);
-
   if (!isAuthenticated) {
     return (
       <SafeAreaView
@@ -101,8 +85,10 @@ const CartScreen = ({ navigation }) => {
   }
 
   const items = cart?.items || [];
+  const activeCoupon = items.length > 0 ? couponApplied : null;
+  const activeCouponErr = items.length > 0 ? couponErr : '';
   const subtotal = Number(totalPrice || 0);
-  const discountAmount = Number(couponApplied?.discount_amount || 0);
+  const discountAmount = Number(activeCoupon?.discount_amount || 0);
   const shippingFee = subtotal > 50 || subtotal === 0 ? 0 : 5;
   const finalPayable = Math.max(0, subtotal - discountAmount + shippingFee);
   const shippingProgress = Math.min(100, Math.round((subtotal / 50) * 100));
@@ -138,6 +124,12 @@ const CartScreen = ({ navigation }) => {
       Alert.alert('Empty Bag', 'Add pieces from the Atelier before checking out.');
       return;
     }
+    if (user) {
+      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+      setRecipientName((prev) => prev || fullName || user.email?.split('@')[0] || '');
+      setContactPhone((prev) => prev || user.phone_number || '');
+      setShippingAddress((prev) => prev || user.address || '');
+    }
     setSettlementOpen(true);
   };
 
@@ -170,7 +162,7 @@ const CartScreen = ({ navigation }) => {
       recipient_name: recipientName.trim(),
       payment_method: methodLabel,
       transaction_id: txnId,
-      coupon_code: couponApplied?.code || '',
+      coupon_code: activeCoupon?.code || '',
       confirmPaid: isOnline,
     });
     setSettling(false);
@@ -199,7 +191,7 @@ const CartScreen = ({ navigation }) => {
       shipping_address: shippingAddress.trim(),
       contact_phone: contactPhone.trim(),
       recipient_name: recipientName.trim(),
-      coupon_code: couponApplied?.code || '',
+      coupon_code: activeCoupon?.code || '',
     });
     setSettling(false);
 
@@ -329,16 +321,16 @@ const CartScreen = ({ navigation }) => {
                     </Text>
                   </TouchableOpacity>
                 </View>
-                {couponApplied ? (
+                {activeCoupon ? (
                   <Text style={[styles.couponSuccess, { color: theme.accent }]}>
-                    Applied {couponApplied.code}: saving $
-                    {couponApplied.discount_amount.toFixed(2)} (
-                    {couponApplied.discount_percent}% off)
+                    Applied {activeCoupon.code}: saving $
+                    {activeCoupon.discount_amount.toFixed(2)} (
+                    {activeCoupon.discount_percent}% off)
                   </Text>
                 ) : null}
-                {couponErr ? (
+                {activeCouponErr ? (
                   <Text style={[styles.couponError, { color: theme.danger }]}>
-                    {couponErr}
+                    {activeCouponErr}
                   </Text>
                 ) : null}
               </View>
@@ -436,7 +428,7 @@ const CartScreen = ({ navigation }) => {
                 <Text style={styles.totalLabel}>Net Payable (Courier {shippingFee === 0 ? 'Free' : '$5.00'})</Text>
                 {discountAmount > 0 ? (
                   <Text style={styles.savingsHint}>
-                    Saved ${discountAmount.toFixed(2)} with {couponApplied?.code}
+                    Saved ${discountAmount.toFixed(2)} with {activeCoupon?.code}
                   </Text>
                 ) : null}
               </View>
