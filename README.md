@@ -13,9 +13,10 @@
 
 ## 🌐 Live Services
 
-* 🌐 **Web Store:** [https://dokanly.vercel.app](https://dokanly.vercel.app)
-* ⚡ **Backend API & Swagger:** [https://dokanly-server.vercel.app/swagger/](https://dokanly-server.vercel.app/swagger/)
-* 📱 **Android Mobile App:** Pre-built `.apk` file is available in the root repository / releases for direct testing.
+* 🌐 **Web Store:** [https://bazaro-lime.vercel.app](https://bazaro-lime.vercel.app)
+* ⚡ **Backend API:** [https://apibazaro-alpha.vercel.app/api/v1/](https://apibazaro-alpha.vercel.app/api/v1/)
+* 📘 **Swagger Docs:** [https://apibazaro-alpha.vercel.app/swagger/](https://apibazaro-alpha.vercel.app/swagger/)
+* 📱 **Android Mobile App:** Pre-built `.apk` via EAS or run directly in **Expo Go** (`/android`).
 
 ---
 
@@ -23,8 +24,8 @@
 
 | Platform | Directory | Core Technologies |
 | :--- | :--- | :--- |
-| **Backend** | [`/backend`](./backend) | **Django**, **DRF**, **SimpleJWT**, **Djoser**, **PostgreSQL**, **Cloudinary** |
-| **Web Frontend** | [`/frontend`](./frontend) | **React 19**, **Vite**, **Tailwind CSS / CSS**, **Axios** |
+| **Backend** | [`/backend`](./backend) | **Django**, **DRF**, **SimpleJWT**, **Djoser**, **Neon PostgreSQL**, **Cloudinary**, **WhiteNoise** |
+| **Web Frontend** | [`/frontend`](./frontend) | **React 19**, **Vite**, **Tailwind CSS**, **Three.js / R3F**, **Framer Motion**, **Axios** |
 | **Mobile App** | [`/android`](./android) | **React Native**, **Expo SDK**, **React Navigation**, **AsyncStorage** |
 
 ---
@@ -40,6 +41,12 @@
 ---
 
 ## 🛠️ How to Run Locally
+
+### 0. 📦 Clone the Repository
+```bash
+git clone https://github.com/Tanbir-Hasan-247/BAZARO.git
+cd BAZARO
+```
 
 ### 1. ⚙️ Backend (Django REST Framework)
 ```bash

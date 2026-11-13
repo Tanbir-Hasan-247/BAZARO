@@ -30,11 +30,11 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "owner": "tanbirhasan",
     "extra": {
       "eas": {
-        "projectId": "df48d4f6-e119-4d43-9f4c-62af576262b2"
+        "projectId": "ae692b24-6a67-4d83-9773-b5cc89aaeece"
       }
-    },
-    "owner": "ashrafulx"
+    }
   }
 }

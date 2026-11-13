@@ -122,13 +122,20 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 
 _vercel_url = config('VERCEL_URL', default='').strip()
-FRONTEND_DOMAIN = config("FRONTEND_DOMAIN", default="localhost:5173")
-FRONTEND_PUBLIC_URL = config("FRONTEND_PUBLIC_URL", default="http://localhost:5173").rstrip("/")
+FRONTEND_DOMAIN = config(
+    "FRONTEND_DOMAIN",
+    default="bazaro-lime.vercel.app" if IS_VERCEL else "localhost:5173",
+)
+FRONTEND_PUBLIC_URL = config(
+    "FRONTEND_PUBLIC_URL",
+    default="https://bazaro-lime.vercel.app" if IS_VERCEL else "http://localhost:5173",
+).rstrip("/")
 _default_backend_url = f"https://{_vercel_url}" if _vercel_url else "http://127.0.0.1:8000"
 BACKEND_PUBLIC_URL = config("BACKEND_PUBLIC_URL", default=_default_backend_url).rstrip("/")
 
 CORS_ALLOW_ALL_ORIGINS = _bool_config('CORS_ALLOW_ALL_ORIGINS', True)
 CORS_ALLOWED_ORIGINS = [
+    "https://bazaro-lime.vercel.app",
     "https://dokanly.vercel.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173",

@@ -1,20 +1,29 @@
 <div align="center">
 
-# 🛒 BAZARO
+# 🛒 BAZARO — Backend API
 
 ### A RESTful E-Commerce API Backend (Apnar Desher Bazaar)
 
-JWT authentication · Product catalog · Reviews · Cart · Orders
+JWT authentication · Product catalog · Reviews · Wishlist · Cart · Orders · Cloudinary · Neon PostgreSQL
 
 <br>
 
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Django](https://img.shields.io/badge/Django-6.1-092E20?style=for-the-badge&logo=django&logoColor=white)
 ![DRF](https://img.shields.io/badge/DRF-3.18-A30000?style=for-the-badge&logo=django&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/Neon_PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
 </div>
+
+---
+
+## 🌐 Live Links
+
+* **Repository:** [https://github.com/Tanbir-Hasan-247/BAZARO](https://github.com/Tanbir-Hasan-247/BAZARO)
+* **Live API:** [https://apibazaro-alpha.vercel.app/api/v1/](https://apibazaro-alpha.vercel.app/api/v1/)
+* **Swagger Docs:** [https://apibazaro-alpha.vercel.app/swagger/](https://apibazaro-alpha.vercel.app/swagger/)
+* **Web Storefront:** [https://bazaro-lime.vercel.app/](https://bazaro-lime.vercel.app/)
 
 ---
 
@@ -36,14 +45,14 @@ JWT authentication · Product catalog · Reviews · Cart · Orders
 | | Feature | Details |
 |---|---|---|
 | 🔐 | **Custom User Model** | Email-based login (no username), plus address & phone number |
-| 🪪 | **JWT Authentication** | Registration, login and token refresh via Djoser + SimpleJWT |
-| 📦 | **Products & Categories** | Full CRUD, public reads, admin-only writes, per-category product count |
+| 🪪 | **JWT Authentication** | Registration, login, password reset & token refresh via Djoser + SimpleJWT |
+| 📦 | **Products & Categories** | Full CRUD, color/size variants, public reads, admin writes, per-category count |
+| ☁️ | **Cloudinary Media** | Cloud image hosting via `django-cloudinary-storage` & `CloudinaryField` |
 | 🔎 | **Search, Filter & Sort** | Search by name/description/category, filter by category & price range, order by price |
-| 📄 | **Pagination** | 10 items per page out of the box |
-| ⭐ | **Reviews** | Nested under products, 1–5 rating + comment, only the author (or staff) can edit/delete |
+| ⭐ | **Reviews & Wishlist** | Nested 1–5 star product reviews and private per-user wishlist toggle |
 | 🧺 | **Shopping Cart** | One cart per user, duplicate products merge quantities automatically |
-| 🧾 | **Orders** | Cart → order conversion with price snapshots per line item |
-| 🛡️ | **Role-based Access** | Users see only their own orders, staff see everything |
+| 🧾 | **Orders, Coupons & Tracking** | Coupon validation, stock deduction, payment gateways (Simulator / SSLCommerz / Stripe) & order tracking |
+| 🛡️ | **Role-based Access** | Users see only their own orders; staff manage catalog, orders & storefront settings |
 
 **Order statuses:** `Not Paid` · `Ready To Ship` · `Shipped` · `Delivered` · `Canceled`
 
@@ -55,25 +64,25 @@ JWT authentication · Product catalog · Reviews · Cart · Orders
 |---|---|
 | **Framework** | Django 6.1, Django REST Framework 3.18 |
 | **Authentication** | Djoser, djangorestframework-simplejwt |
-| **Filtering** | django-filter |
-| **Nested Routes** | drf-nested-routers |
+| **Database** | Neon PostgreSQL (`DATABASE_URL`), SQLite (local/test fallback) |
+| **Media & Static** | Cloudinary (`django-cloudinary-storage`), WhiteNoise, Vercel Python |
+| **Filtering & Docs** | django-filter, drf-nested-routers, drf-yasg (Swagger / ReDoc) |
 | **Config** | python-decouple |
-| **Database** | SQLite (default) |
-| **Dev Tools** | django-debug-toolbar |
 
 ---
 
 ## 🗂️ Project Structure
 
-```
-Dokanly/
-├── Dokanly/       # Project settings & root URLs
-├── api/           # Central API router, shared permissions
-├── product/       # Category, Product, Review (models, views, filters, pagination)
-├── order/         # Cart, CartItem, Order, OrderItem
+```text
+BAZARO/backend/
+├── Dokanly/       # Project settings, root URLs & Vercel WSGI entrypoint
+├── api/           # Central API router, shared permissions, footer/campaign/newsletter APIs
+├── product/       # Category, Product, ProductImage, Review, Wishlist
+├── order/         # Cart, CartItem, Coupon, Order, OrderItem, Payment gateways & emails
 ├── users/         # Custom User model, manager, Djoser serializers
-├── fixtures/      # Sample product & category data
+├── seed_data.py   # Demo users, categories, products, reviews & coupons seeder
 ├── requirements.txt
+├── vercel.json
 └── manage.py
 ```
 
@@ -109,7 +118,6 @@ erDiagram
         text description
         decimal price
         int stock
-        image image
     }
     REVIEW {
         int ratings
@@ -140,51 +148,49 @@ erDiagram
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/ashrafulX/Dokanly.git
-cd Dokanly
+git clone https://github.com/Tanbir-Hasan-247/BAZARO.git
+cd BAZARO/backend
 ```
 
 ### 2️⃣ Create a virtual environment & install dependencies
 
 ```bash
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: .\venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-> 💡 Requires **Python 3.12+** (Django 6.x).
+> 💡 Requires **Python 3.12+** (`Django 6.1`).
 
 ### 3️⃣ Configure environment variables
 
-Create a `.env` file in the project root (next to `manage.py`):
+Copy `.env.example` to `.env` inside `backend/` (next to `manage.py`):
 
 ```env
 SECRET_KEY=your-secret-key-here
+DEBUG=True
+DATABASE_URL=postgresql://user:password@host/dbname?sslmode=require
+CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
 ```
 
-### 4️⃣ Apply migrations
+### 4️⃣ Apply migrations & seed data
 
 ```bash
 python manage.py migrate
+python seed_data.py
 ```
 
-### 5️⃣ Load sample data *(optional)*
+### 5️⃣ Run the server
 
 ```bash
-python manage.py loaddata fixtures/product_data.json
+python manage.py runserver 0.0.0.0:8000
 ```
 
-### 6️⃣ Create a superuser & run the server
-
-```bash
-python manage.py createsuperuser
-python manage.py runserver
-```
-
-| | URL |
-|---|---|
-| 🌐 API | `http://127.0.0.1:8000/api/v1/` |
-| 🛠️ Admin | `http://127.0.0.1:8000/admin/` |
+| | Local URL | Live Production URL |
+|---|---|---|
+| 🌐 API | `http://127.0.0.1:8000/api/v1/` | `https://apibazaro-alpha.vercel.app/api/v1/` |
+| 📘 Swagger | `http://127.0.0.1:8000/swagger/` | `https://apibazaro-alpha.vercel.app/swagger/` |
+| 🛠️ Admin | `http://127.0.0.1:8000/admin/` | `https://apibazaro-alpha.vercel.app/admin/` |
 
 ---
 
@@ -194,7 +200,7 @@ python manage.py runserver
 
 Protected endpoints expect this header:
 
-```
+```text
 Authorization: JWT <access_token>
 ```
 
@@ -205,7 +211,8 @@ Authorization: JWT <access_token>
 | `POST` | `/auth/users/` | Register a new user |
 | `POST` | `/auth/jwt/create/` | Login with email + password → access & refresh tokens |
 | `POST` | `/auth/jwt/refresh/` | Refresh the access token |
-| `GET` | `/auth/users/me/` | Current user profile |
+| `GET` `PATCH` | `/auth/users/me/` | Current user profile |
+| `POST` | `/auth/users/reset_password/` | Request password reset |
 
 ### 📦 Products & Categories
 
@@ -214,6 +221,7 @@ Authorization: JWT <access_token>
 | `GET` | `/products/` | 🌍 Public | List products (paginated) |
 | `POST` | `/products/` | 👑 Admin | Create a product |
 | `GET` `PUT` `PATCH` `DELETE` | `/products/{id}/` | 🌍 read · 👑 write | Product detail |
+| `GET` `POST` | `/products/{id}/images/` | 🌍 read · 👑 write | Product gallery images (Cloudinary) |
 | `GET` `POST` | `/categories/` | 🌍 read · 👑 write | List / create categories |
 | `GET` `PUT` `PATCH` `DELETE` | `/categories/{id}/` | 🌍 read · 👑 write | Category detail |
 
@@ -228,23 +236,24 @@ Authorization: JWT <access_token>
 | `category_id` | `?category_id=1` | Filter by category |
 | `price__gt` / `price__lt` | `?price__gt=100&price__lt=500` | Filter by price range |
 | `ordering` | `?ordering=-price` | Sort by price (prefix `-` for descending) |
-| `page` | `?page=2` | Page number (10 per page) |
+| `page` / `page_size` | `?page=1&page_size=50` | Pagination |
 
 </details>
 
-### ⭐ Reviews
+### ⭐ Reviews & Wishlist
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | `GET` | `/products/{product_id}/reviews/` | 🌍 Public | List reviews of a product |
 | `POST` | `/products/{product_id}/reviews/` | 🔑 Authenticated | Add a review |
 | `PUT` `PATCH` `DELETE` | `/products/{product_id}/reviews/{id}/` | ✍️ Author or staff | Edit / delete a review |
+| `GET` `POST` | `/wishlist/` | 🔑 Authenticated | List / toggle saved wishlist products |
 
 ### 🧺 Cart
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/carts/` | Create a cart for the logged-in user |
+| `POST` | `/carts/` | Create or get cart for the logged-in user |
 | `GET` | `/carts/{cart_id}/` | View the cart with items and total price |
 | `DELETE` | `/carts/{cart_id}/` | Delete the cart |
 | `GET` | `/carts/{cart_id}/items/` | List cart items |
@@ -256,9 +265,11 @@ Authorization: JWT <access_token>
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/orders/` | Place an order → `{"cart_id": "<uuid>"}` (the cart is cleared afterwards) |
+| `POST` | `/orders/` | Place an order → `{"cart_id": "<uuid>"}` |
 | `GET` | `/orders/` | List your orders (staff see all) |
 | `GET` | `/orders/{id}/` | Order detail with line items |
+| `POST` | `/orders/{id}/confirm_payment/` | Confirm order settlement |
+| `GET` | `/track-order/` | Public order tracking lookup (`?order_id=...`) |
 
 ---
 
@@ -280,28 +291,30 @@ flowchart LR
 <br>
 
 ```bash
+# Replace https://apibazaro-alpha.vercel.app with http://127.0.0.1:8000 for local dev
+
 # 1. Register
-curl -X POST http://127.0.0.1:8000/api/v1/auth/users/ \
+curl -X POST https://apibazaro-alpha.vercel.app/api/v1/auth/users/ \
   -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"StrongPass123","first_name":"John","last_name":"Doe"}'
+  -d '{"email":"user@example.com","password":"StrongPass123","first_name":"Tanbir","last_name":"Hasan"}'
 
 # 2. Login
-curl -X POST http://127.0.0.1:8000/api/v1/auth/jwt/create/ \
+curl -X POST https://apibazaro-alpha.vercel.app/api/v1/auth/jwt/create/ \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"StrongPass123"}'
 
 # 3. Create a cart
-curl -X POST http://127.0.0.1:8000/api/v1/carts/ \
+curl -X POST https://apibazaro-alpha.vercel.app/api/v1/carts/ \
   -H "Authorization: JWT <access_token>"
 
 # 4. Add an item to the cart
-curl -X POST http://127.0.0.1:8000/api/v1/carts/<cart_id>/items/ \
+curl -X POST https://apibazaro-alpha.vercel.app/api/v1/carts/<cart_id>/items/ \
   -H "Authorization: JWT <access_token>" \
   -H "Content-Type: application/json" \
   -d '{"product_id":1,"quantity":2}'
 
 # 5. Place the order
-curl -X POST http://127.0.0.1:8000/api/v1/orders/ \
+curl -X POST https://apibazaro-alpha.vercel.app/api/v1/orders/ \
   -H "Authorization: JWT <access_token>" \
   -H "Content-Type: application/json" \
   -d '{"cart_id":"<cart_id>"}'
@@ -311,14 +324,14 @@ curl -X POST http://127.0.0.1:8000/api/v1/orders/ \
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Author & Maintainer
 
 <div align="center">
 
-**Ashraful**
+**Tanbir Hasan**
 
-[![GitHub](https://img.shields.io/badge/GitHub-ashrafulX-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ashrafulX)
+[![GitHub](https://img.shields.io/badge/GitHub-Tanbir--Hasan--247-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Tanbir-Hasan-247)
 
-⭐ If you find this project useful, consider giving it a star!
+⭐ If you find this project useful, consider giving the repository a star!
 
 </div>

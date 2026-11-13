@@ -8,7 +8,7 @@ import {
   clearAuthAndCartStorage,
 } from '../constants/storageKeys';
 
-const PRODUCTION_FALLBACK_URL = 'https://dokanly-server.vercel.app/api/v1';
+const PRODUCTION_FALLBACK_URL = 'https://apibazaro-alpha.vercel.app/api/v1';
 
 function extractScriptUrl() {
   try {
@@ -52,6 +52,7 @@ function buildDevCandidates() {
       candidates.push('http://127.0.0.1:8000/api/v1');
     }
 
+    candidates.push(PRODUCTION_FALLBACK_URL);
     return [...new Set(candidates)];
   }
 

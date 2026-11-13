@@ -1,6 +1,9 @@
 # BAZARO Mobile App (React Native + Expo)
 
-A complete cross-platform mobile e-commerce application connected directly to the **BAZARO Django Rest Framework (DRF)** backend (`http://127.0.0.1:8000/api/v1/`).
+A complete cross-platform mobile e-commerce application connected directly to the **BAZARO Django REST Framework (DRF)** backend ([https://apibazaro-alpha.vercel.app/api/v1/](https://apibazaro-alpha.vercel.app/api/v1/), with local `http://127.0.0.1:8000/api/v1/` support via `android/.env`).
+
+* **Repository:** [https://github.com/Tanbir-Hasan-247/BAZARO](https://github.com/Tanbir-Hasan-247/BAZARO)
+* **Web Store:** [https://bazaro-lime.vercel.app](https://bazaro-lime.vercel.app)
 
 ---
 
@@ -43,10 +46,12 @@ A complete cross-platform mobile e-commerce application connected directly to th
 
 ## 🛠️ How to Run the App
 
-### 1. Start the Metro Bundler
+### 1. Clone & Start the Metro Bundler
 Navigate into the `android` directory and run:
 ```bash
-cd android
+git clone https://github.com/Tanbir-Hasan-247/BAZARO.git
+cd BAZARO/android
+npm install
 npm start
 ```
 
@@ -78,7 +83,7 @@ android/
     ├── api/
     │   └── client.js        # Axios instance with JWT interceptor & auto-refresh
     ├── constants/
-    │   └── theme.js         # Dokanly UI color palette, typography & shadows
+    │   └── theme.js         # BAZARO UI color palette, typography & shadows
     ├── context/
     │   ├── AuthContext.js   # User session, login, register, profile update
     │   └── CartContext.js   # Cart items, badge count, quantity & checkout

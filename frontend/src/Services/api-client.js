@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Detect whether to use environment variable, local Django server, or deployed production server
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://dokanly-server.vercel.app/api/v1';
+// Detect whether to use environment variable or deployed production server
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://apibazaro-alpha.vercel.app/api/v1').replace(/\/+$/, '');
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
