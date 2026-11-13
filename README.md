@@ -96,5 +96,5 @@ BAZARO/
 
 ## 👨‍💻 Author & Maintainer
 
-* **Ashraful Islam** — [@ashrafulX](https://github.com/ashrafulX)
-* **Email:** [ashrafulwho@gmail.com](mailto:ashrafulwho@gmail.com)
+* **Tanbir Hasan** — [@Tanbir-Hasan-247](https://github.com/Tanbir-Hasan-247)
+* **Email:** [tanbirhasan.se@gmail.com](mailto:tanbirhasan.se@gmail.com)

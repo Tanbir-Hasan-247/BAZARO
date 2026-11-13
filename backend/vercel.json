@@ -1,13 +1,3 @@
 {
-    "builds": [{
-      "src": "Dokanly/wsgi.py",
-      "use": "@vercel/python",
-      "config": { "maxLambdaSize": "15mb", "runtime": "python3.11.3" }
-    }],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "Dokanly/wsgi.py"
-      }
-    ]
+  "$schema": "https://openapi.vercel.sh/vercel.json"
 }

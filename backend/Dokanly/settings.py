@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
+import sys
 from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlparse
 from decouple import config
 from datetime import timedelta
 import cloudinary
@@ -24,8 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-bazaro-super-secret-key-development-2026')
 
+IS_VERCEL = config('VERCEL', default=False, cast=bool)
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=not IS_VERCEL, cast=bool)
 
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
@@ -47,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'corsheaders',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'drf_yasg',
     'rest_framework',
     'djoser',
@@ -98,8 +104,16 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Dokanly.wsgi.app'
+WSGI_APPLICATION = 'Dokanly.wsgi.application'
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
+_vercel_url = config('VERCEL_URL', default='').strip()
+FRONTEND_DOMAIN = config("FRONTEND_DOMAIN", default="localhost:5173")
+FRONTEND_PUBLIC_URL = config("FRONTEND_PUBLIC_URL", default="http://localhost:5173").rstrip("/")
+_default_backend_url = f"https://{_vercel_url}" if _vercel_url else "http://127.0.0.1:8000"
+BACKEND_PUBLIC_URL = config("BACKEND_PUBLIC_URL", default=_default_backend_url).rstrip("/")
 
 CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
 CORS_ALLOWED_ORIGINS = [
@@ -110,14 +124,62 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:1111",
     "http://192.168.0.100:5173",
 ]
+if FRONTEND_PUBLIC_URL.startswith(('http://', 'https://')) and FRONTEND_PUBLIC_URL not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append(FRONTEND_PUBLIC_URL)
+
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='https://*.vercel.app,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000',
+    cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
+)
+if FRONTEND_PUBLIC_URL.startswith(('http://', 'https://')) and FRONTEND_PUBLIC_URL not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append(FRONTEND_PUBLIC_URL)
+if _vercel_url:
+    _vercel_origin = f"https://{_vercel_url}"
+    if _vercel_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_vercel_origin)
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+DATABASE_URL = config('DATABASE_URL', default='').strip()
 DB_ENGINE = config('DB_ENGINE', default='sqlite')
 DB_NAME = config('db_name', default='')
 
-if DB_ENGINE == 'postgresql' or (DB_NAME and DB_ENGINE != 'sqlite'):
+
+def _build_postgres_from_url(url: str) -> dict:
+    parsed = urlparse(url)
+    query_params = parse_qs(parsed.query)
+    options = {'connect_timeout': 10}
+    if query_params.get('sslmode'):
+        options['sslmode'] = query_params['sslmode'][-1]
+    elif parsed.hostname not in (None, 'localhost', '127.0.0.1'):
+        options['sslmode'] = 'require'
+    if query_params.get('channel_binding'):
+        options['channel_binding'] = query_params['channel_binding'][-1]
+    return {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': unquote(parsed.path.lstrip('/')),
+        'USER': unquote(parsed.username or ''),
+        'PASSWORD': unquote(parsed.password or ''),
+        'HOST': parsed.hostname or '',
+        'PORT': str(parsed.port or 5432),
+        'CONN_MAX_AGE': 60,
+        'CONN_HEALTH_CHECKS': True,
+        'OPTIONS': options,
+    }
+
+
+if 'test' in sys.argv and not config('TEST_USE_POSTGRES', default=False, cast=bool):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+elif DATABASE_URL.startswith(('postgres://', 'postgresql://')):
+    DATABASES = {'default': _build_postgres_from_url(DATABASE_URL)}
+elif DB_ENGINE == 'postgresql' or (DB_NAME and DB_ENGINE != 'sqlite'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -126,6 +188,8 @@ if DB_ENGINE == 'postgresql' or (DB_NAME and DB_ENGINE != 'sqlite'):
             'PASSWORD': config('db_password', default=''),
             'HOST': config('db_host', default='localhost'),
             'PORT': config('db_port', default='5432'),
+            'CONN_MAX_AGE': 60,
+            'CONN_HEALTH_CHECKS': True,
         }
     }
 else:
@@ -136,20 +200,53 @@ else:
         }
     }
 
-# Configuration for cloudinary storage
-cloud_name = config('cloud_name', default='')
-api_key = config('api_key', default='')
-api_secret = config('api_secret', default='')
-secure = config('secure', default=True, cast=bool)
+# Configuration for Cloudinary media storage
+# Supports CLOUDINARY_URL or (CLOUDINARY_CLOUD_NAME / cloud_name, API key, API secret)
+def _resolve_cloudinary_credentials():
+    raw_url = config('CLOUDINARY_URL', default='').strip()
+    if raw_url.startswith('cloudinary://'):
+        parsed = urlparse(raw_url)
+        c_name = unquote(parsed.hostname or '').strip()
+        c_key = unquote(parsed.username or '').strip()
+        c_secret = unquote(parsed.password or '').strip()
+        if c_name and c_key and c_secret and c_name != 'demo':
+            return c_name, c_key, c_secret
 
-if cloud_name and api_key and api_secret:
-    cloudinary.config( 
+    c_name = (config('CLOUDINARY_CLOUD_NAME', default='') or config('cloud_name', default='')).strip()
+    c_key = (config('CLOUDINARY_API_KEY', default='') or config('api_key', default='')).strip()
+    c_secret = (config('CLOUDINARY_API_SECRET', default='') or config('api_secret', default='')).strip()
+    if c_name and c_key and c_secret and c_name != 'demo':
+        return c_name, c_key, c_secret
+    return None
+
+
+secure = config('secure', default=True, cast=bool)
+_cloudinary_creds = _resolve_cloudinary_credentials()
+_is_running_tests = 'test' in sys.argv
+USE_CLOUDINARY_MEDIA = bool(
+    _cloudinary_creds
+    and not (_is_running_tests and not config('TEST_USE_CLOUDINARY', default=False, cast=bool))
+)
+
+if _cloudinary_creds:
+    cloud_name, api_key, api_secret = _cloudinary_creds
+    cloudinary.config(
         cloud_name=cloud_name,
         api_key=api_key,
         api_secret=api_secret,
         secure=secure,
     )
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': cloud_name,
+        'API_KEY': api_key,
+        'API_SECRET': api_secret,
+        'SECURE': secure,
+    }
+    # Keep CLOUDINARY_URL visible to helpers if configured via split keys
+    os.environ.setdefault(
+        'CLOUDINARY_URL',
+        f'cloudinary://{api_key}:{api_secret}@{cloud_name}',
+    )
 else:
     cloudinary.config(
         cloud_name='demo',
@@ -157,7 +254,12 @@ else:
         api_secret='demo',
         secure=False,
     )
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': 'demo',
+        'API_KEY': 'demo',
+        'API_SECRET': 'demo',
+        'SECURE': False,
+    }
 
 
 # Password validation
@@ -194,14 +296,27 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE="whitenoise.storage.CompressedStaticFilesStorage"
+STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
-# if static folder in root
-# STATIC_FILES_DIR=BASE_DIR / 'static'
-MEDIA_URL='/media/'
-MEDIA_ROOT=BASE_DIR / 'media'
+STORAGES = {
+    'default': {
+        'BACKEND': (
+            'cloudinary_storage.storage.MediaCloudinaryStorage'
+            if USE_CLOUDINARY_MEDIA
+            else 'django.core.files.storage.FileSystemStorage'
+        ),
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
+# Legacy aliases retained for django-cloudinary-storage 0.3.0 compatibility
+DEFAULT_FILE_STORAGE = STORAGES['default']['BACKEND']
+STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
 
 
 # Email Configuration (Console backend in dev when EMAIL_HOST is unset; SMTP when configured)
@@ -220,9 +335,6 @@ if _email_host:
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-FRONTEND_DOMAIN = config("FRONTEND_DOMAIN", default="localhost:5173")
-FRONTEND_PUBLIC_URL = config("FRONTEND_PUBLIC_URL", default="http://localhost:5173").rstrip("/")
-BACKEND_PUBLIC_URL = config("BACKEND_PUBLIC_URL", default="http://127.0.0.1:8000").rstrip("/")
 DOMAIN = FRONTEND_DOMAIN
 SITE_NAME = "BAZARO"
 
